@@ -65,12 +65,12 @@ public class teleop extends OpMode
 
     // The motors for the ball throwing bloody thing
     // TODO: Read documentation to change to ideal motor for speed
-    private DcMotor pickUp = null;
-    private DcMotorEx launch = null;
+    private DcMotorEx intake = null;
+
 
     // You are not allowed to judge I am sleep deprived
-    private DcMotorEx rightPelvis = null;
-    private DcMotorEx leftPelvis = null;
+    private DcMotorEx Launch = null;
+    private DcMotorEx middle = null;
     /*
      * Code to run ONCE when the driver hits INIT
      */
@@ -87,10 +87,10 @@ public class teleop extends OpMode
         RFMotor  = hardwareMap.get(DcMotorEx.class, "RFMotor");
 
         // Initializing the Motors to the correct entry
-        pickUp = hardwareMap.get(DcMotor.class,"pickUp");
-        rightPelvis = hardwareMap.get(DcMotorEx.class, "rightPelvis");
-        leftPelvis = hardwareMap.get(DcMotorEx.class, "leftPelvis");
-        launch = hardwareMap.get(DcMotorEx.class, "launch");
+        intake = hardwareMap.get(DcMotorEx.class,"intake");
+        Launch = hardwareMap.get(DcMotorEx.class, "Launch");
+        middle = hardwareMap.get(DcMotorEx.class, "middle");
+
 
 
 
@@ -99,25 +99,41 @@ public class teleop extends OpMode
         // Pushing the left stick forward MUST make robot go forward. So adjust these two lines based on your first test drive.
         // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
         LBMotor.setDirection(DcMotorEx.Direction.FORWARD);
-        RBMotor.setDirection(DcMotorEx.Direction.FORWARD);
-        LFMotor.setDirection(DcMotorEx.Direction.FORWARD);
-        RFMotor.setDirection(DcMotorEx.Direction.REVERSE);
+        RBMotor.setDirection(DcMotorEx.Direction.REVERSE);
+        LFMotor.setDirection(DcMotorEx.Direction.REVERSE);
+        RFMotor.setDirection(DcMotorEx.Direction.FORWARD);
 
         // Directions for the throwing motors
-        leftPelvis.setDirection(DcMotorEx.Direction.FORWARD);
-        rightPelvis.setDirection(DcMotorEx.Direction.REVERSE);
-        pickUp.setDirection(DcMotorEx.Direction.REVERSE);
+        middle.setDirection(DcMotorEx.Direction.FORWARD);
+        Launch.setDirection(DcMotorEx.Direction.FORWARD);
+        intake.setDirection(DcMotorEx.Direction.FORWARD);
 
 
-        leftPelvis.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        rightPelvis.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        leftPelvis.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-        rightPelvis.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-        leftPelvis.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        rightPelvis.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        launch.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        launch.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        launch.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        middle.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        Launch.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        middle.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        Launch.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        middle.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        Launch.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+
+        intake.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        intake.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        intake.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+
+        LBMotor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        LFMotor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        RBMotor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        RFMotor.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+
+        LBMotor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        LFMotor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        RBMotor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        RFMotor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+
+
+
+
+
 
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
@@ -146,12 +162,15 @@ public class teleop extends OpMode
         // Setup a variable for each drive wheel to save power level for telemetry
 
         double pelvisInput = gamepad2.left_stick_y;
-        double intakePower = gamepad2.right_stick_y;
+        double middleP = gamepad2.right_stick_y;
+        double inin = gamepad2.right_trigger-gamepad2.left_trigger;
+       // double intakePower = gamepad2.left_trigger-gamepad2.right_trigger;
 
         // Scale to your desired maximum velocity
+        double intakeV = inin*2500;
         // This is now your actual max speed
-        double maxLaunchVelocity = 2500;
-        double targetVelocity = pelvisInput * maxLaunchVelocity;
+        double maxLaunchVelocity = 8500;
+        double targetVelocity = pelvisInput*maxLaunchVelocity;
 
         double drive = -gamepad1.left_stick_y;
         double strafe = gamepad1.right_trigger - gamepad1.left_trigger;
@@ -171,10 +190,9 @@ public class teleop extends OpMode
         LBMotor.setVelocity(LBPower*BasePower);
         RBMotor.setVelocity(RBPower*BasePower);
 
-        leftPelvis.setVelocity(targetVelocity);
-        rightPelvis.setVelocity(targetVelocity);
-        launch.setVelocity(targetVelocity);
-        pickUp.setPower(intakePower);
+        middle.setPower(middleP);
+        Launch.setPower(pelvisInput);
+        intake.setVelocity(intakeV);
 
 
         // Show the elapsed game time and wheel power.
