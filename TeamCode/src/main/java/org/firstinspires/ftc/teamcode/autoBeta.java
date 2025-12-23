@@ -81,12 +81,10 @@ public class autoBeta extends LinearOpMode {
     // This is gearing DOWN for less speed and more torque.
     // For gearing UP, use a gear ratio less than 1.0. Note this will affect the direction of wheel rotation.
     static final double     COUNTS_PER_MOTOR_REV    = 28 ;
-    static final double     DRIVE_GEAR_REDUCTION    = 1.0 ;     // No External Gearing.
-    static final double     WHEEL_DIAMETER_CM   = 8.0 ;     // For figuring circumference
+    static final double     DRIVE_GEAR_REDUCTION    = 12.0 ;
+    static final double     WHEEL_DIAMETER_CM   = 7.5 ;     // For figuring circumference
     static final double     COUNTS_PER_CM         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_CM * 3.1415);
-    static final double     DRIVE_SPEED             = 0.6;
-    static final double     TURN_SPEED              = 0.5;
 
     @Override
     public void runOpMode() {
@@ -165,7 +163,13 @@ public class autoBeta extends LinearOpMode {
 
         // Step through each leg of the path,
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
-        encoderDrive(0.5, 100, 0, 0, 5);
+
+
+        encoderDrive(0.3, 100, 0, 0, 5);
+
+
+
+
 
         telemetry.addData("Path", "Complete");
         telemetry.update();
@@ -176,7 +180,7 @@ public class autoBeta extends LinearOpMode {
      *  Method to perform a relative move, based on encoder counts.
      *  Encoders are not reset as the move is based on the current position.
      *  Move will stop if any of three conditions occur:
-     *  1) Move gets to the desired position
+     *  1) Move gets to the desired positiona
      *  2) Move runs out of time
      *  3) Driver stops the OpMode running.
      */
@@ -187,7 +191,9 @@ public class autoBeta extends LinearOpMode {
         int newRBTarget;
         int newLFTarget;
         int newRFTarget;
+        double maxVel = 2500;
 
+        double targetVel = speed * maxVel;
 
         // Ensure that the OpMode is still active
         if (opModeIsActive()) {
@@ -213,10 +219,10 @@ public class autoBeta extends LinearOpMode {
 
             // reset the timeout time and start motion.
             runtime.reset();
-            LBMotor.setPower(Math.abs(speed));
-            RBMotor.setPower(Math.abs(speed));
-            LFMotor.setPower(Math.abs(speed));
-            RFMotor.setPower(Math.abs(speed));
+            LBMotor.setVelocity(Math.abs(targetVel));
+            RBMotor.setVelocity(Math.abs(targetVel));
+            LFMotor.setVelocity(Math.abs(targetVel));
+            RFMotor.setVelocity(Math.abs(targetVel));
 
             // keep looping while we are still active, and there is time left, and both motors are running.
             // Note: We use (isBusy() && isBusy()) in the loop test, which means that when EITHER motor hits
@@ -236,10 +242,10 @@ public class autoBeta extends LinearOpMode {
             }
 
             // Stop all motion;
-            LBMotor.setPower(0);
-            RBMotor.setPower(0);
-            LFMotor.setPower(0);
-            RFMotor.setPower(0);
+            LBMotor.setVelocity(0);
+            RBMotor.setVelocity(0);
+            LFMotor.setVelocity(0);
+            RFMotor.setVelocity(0);
 
             // Turn off RUN_TO_POSITION
             LBMotor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
